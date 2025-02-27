@@ -24,7 +24,7 @@ public class TriangleShape extends Shapes {
         this.color = color;
         this.strokeWidth = strokeWidth;
     }
-
+    @Override
     public Shape draw() {
         Polygon triangle = new Polygon(new double[]{this.x1, this.y1, this.x2, this.y2, this.x3, this.y3});
         triangle.setFill(Color.TRANSPARENT);

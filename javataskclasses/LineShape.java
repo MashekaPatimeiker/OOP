@@ -20,7 +20,7 @@ public class LineShape extends Shapes {
         this.color = color;
         this.strokeWidth = strokeWidth;
     }
-
+    @Override
     public Shape draw() {
         Line line = new Line(this.startX, this.startY, this.endX, this.endY);
         line.setFill(Color.TRANSPARENT);

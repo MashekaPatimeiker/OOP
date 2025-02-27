@@ -20,7 +20,7 @@ public class RectangleShape extends Shapes {
         this.color = color;
         this.strokeWidth = strokeWidth;
     }
-
+    @Override
     public Shape draw() {
         Rectangle rectangle = new Rectangle(this.x, this.y, this.width, this.height);
         rectangle.setFill(Color.TRANSPARENT);
