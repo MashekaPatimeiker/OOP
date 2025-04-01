@@ -1,5 +1,6 @@
 package com.example.demo3.javataskclasses;
 
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
@@ -9,24 +10,72 @@ public class LineShape extends Shapes {
     private double startY;
     private double endX;
     private double endY;
-    private final Color color;
-    private double strokeWidth;
+    private Color color;
+    private final double strokeWidth;
 
-    public LineShape(double startX, double startY, double endX, double endY, Color color, double strokeWidth) {
-        this.startX = startX;
-        this.startY = startY;
-        this.endX = endX;
-        this.endY = endY;
-        this.color = color;
-        this.strokeWidth = strokeWidth;
+    public LineShape() {
+        this.color = Color.BLACK; // Default color
+        this.strokeWidth = 1.0; // Default stroke width
+        Line line = new Line();
+        setJavaFXShape(line);
+        addHandlers(); // Добавляем обработчики событий
     }
+
     @Override
     public Shape draw() {
-        Line line = new Line(this.startX, this.startY, this.endX, this.endY);
-        line.setFill(Color.TRANSPARENT);
+        Line line = (Line) this.javafxShape;
+        line.setStartX(this.startX);
+        line.setStartY(this.startY);
+        line.setEndX(this.endX);
+        line.setEndY(this.endY);
         line.setStrokeWidth(this.strokeWidth);
         line.setStroke(this.color);
-        this.setJavaFXShape(line);
         return line;
+    }
+
+    @Override
+    public void setStart(double x, double y) {
+        this.startX = x;
+        this.startY = y;
+        draw(); // Обновляем линию при установке начальной точки
+    }
+
+    @Override
+    public void reset() {
+
+    }
+
+    public void setEnd(double x, double y) {
+        this.endX = x;
+        this.endY = y;
+        draw(); // Обновляем линию при установке конечной точки
+    }
+
+    @Override
+    public void updateShape(double x, double y) {
+        setEnd(x, y); // Обновляем конечную точку линии
+    }
+
+    @Override
+    public void finalizeShape(double x, double y) {
+        setEnd(x, y); // Завершаем рисование, устанавливая конечную точку
+    }
+
+    private void addHandlers() {
+        this.javafxShape.setOnMousePressed(this::onMousePressed);
+        this.javafxShape.setOnMouseDragged(this::onMouseDragged);
+        this.javafxShape.setOnMouseReleased(this::onMouseReleased);
+    }
+
+    private void onMousePressed(MouseEvent event) {
+        setStart(event.getX(), event.getY());
+    }
+
+    private void onMouseDragged(MouseEvent event) {
+        updateShape(event.getX(), event.getY());
+    }
+
+    private void onMouseReleased(MouseEvent event) {
+        finalizeShape(event.getX(), event.getY());
     }
 }
