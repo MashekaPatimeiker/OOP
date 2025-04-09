@@ -7,16 +7,18 @@ import javafx.scene.shape.Shape;
 import java.util.ArrayList;
 import java.util.List;
 
+import static javafx.scene.paint.Color.TRANSPARENT;
+
 public class PolylineShape extends Shapes {
     private List<Double> points;
     private Color color;
     private double strokeWidth;
-    private String currentShapeType; // Хранит текущий тип фигуры
+    private boolean isFinalized = false;
 
     public PolylineShape() {
         this.points = new ArrayList<>();
-        this.color = Color.BLACK; // Default color
-        this.strokeWidth = 1.0; // Default stroke width
+        this.color = Color.BLACK;
+        this.strokeWidth = 1.0;
         Polyline polyline = new Polyline();
         setJavaFXShape(polyline);
     }
@@ -28,34 +30,43 @@ public class PolylineShape extends Shapes {
         polyline.getPoints().addAll(points);
         polyline.setStroke(color);
         polyline.setStrokeWidth(strokeWidth);
+        polyline.setFill(TRANSPARENT);
         return polyline;
     }
 
     public void addPoint(double x, double y) {
-        points.add(x);
-        points.add(y);
-        draw();
+        if (!isFinalized) {
+            points.add(x);
+            points.add(y);
+            draw();
+        }
     }
 
+    @Override
     public void setColor(Color color) {
         this.color = color;
+        if (this.javafxShape != null) {
+            this.javafxShape.setStroke(color);
+        }
     }
 
+    @Override
     public void setStrokeWidth(double strokeWidth) {
         this.strokeWidth = strokeWidth;
+        if (this.javafxShape != null) {
+            this.javafxShape.setStrokeWidth(strokeWidth);
+        }
     }
 
     @Override
     public void updateShape(double x, double y) {
-        // Not needed for polyline
+        // Не требуется для полилинии
     }
 
     @Override
     public void finalizeShape(double x, double y) {
-        currentShapeType = "Polyline";
-        // Add any additional logic for finalizing the polyline
+        this.isFinalized = true;
     }
-
 
     @Override
     public void setStart(double x, double y) {
@@ -65,9 +76,10 @@ public class PolylineShape extends Shapes {
     @Override
     public void reset() {
         points.clear();
+        isFinalized = false;
     }
 
-    public void setCurrentShapeType(String shapeType) {
-        this.currentShapeType = shapeType;
+    public boolean isFinalized() {
+        return isFinalized;
     }
 }

@@ -5,6 +5,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.Shape;
 
+import static javafx.scene.paint.Color.TRANSPARENT;
+
 public class EllipseShape extends Shapes {
     private double centerX;
     private double centerY;
@@ -15,8 +17,8 @@ public class EllipseShape extends Shapes {
     private boolean isFirstClick = true; // Track the click state
 
     public EllipseShape() {
-        this.color = Color.BLACK; // Default color
-        this.strokeWidth = 1.0; // Default stroke width
+        this.color = Color.BLACK;
+        this.strokeWidth = 1.0;
         Ellipse ellipse = new Ellipse();
         setJavaFXShape(ellipse);
         addHandlers();
@@ -29,10 +31,25 @@ public class EllipseShape extends Shapes {
         ellipse.setCenterY(centerY);
         ellipse.setRadiusX(radiusX);
         ellipse.setRadiusY(radiusY);
-        ellipse.setFill(Color.TRANSPARENT);
+        ellipse.setFill(this.getFillColor());
         ellipse.setStrokeWidth(strokeWidth);
         ellipse.setStroke(color);
         return ellipse;
+    }
+    @Override
+    public void setColor(Color color) {
+        this.color = color;
+        if (this.javafxShape != null) {
+            this.javafxShape.setStroke(color);
+        }
+    }
+
+    @Override
+    public void setStrokeWidth(double strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        if (this.javafxShape != null) {
+            this.javafxShape.setStrokeWidth(strokeWidth);
+        }
     }
 
     public void setCenter(double x, double y) {
@@ -48,16 +65,19 @@ public class EllipseShape extends Shapes {
     }
 
     private void addHandlers() {
-        this.javafxShape.setOnMousePressed(this::onMousePressed);
+        this.javafxShape.setOnMousePressed(event -> {
+            event.consume();
+            this.onMousePressed(event);
+        });
     }
 
     private void onMousePressed(MouseEvent event) {
         if (isFirstClick) {
             setCenter(event.getX(), event.getY());
-            isFirstClick = false; // Switch to second click
+            isFirstClick = false;
         } else {
             setRadii(Math.abs(event.getX() - centerX), Math.abs(event.getY() - centerY));
-            isFirstClick = true; // Reset for the next ellipse
+            isFirstClick = true;
         }
     }
 

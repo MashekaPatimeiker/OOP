@@ -5,6 +5,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 
+import static javafx.scene.paint.Color.TRANSPARENT;
+
 public class RectangleShape extends Shapes {
     private double startX;
     private double startY;
@@ -14,8 +16,8 @@ public class RectangleShape extends Shapes {
     private double strokeWidth;
 
     public RectangleShape() {
-        this.color = Color.BLACK; // Default color
-        this.strokeWidth = 1.0; // Default stroke width
+        this.color = Color.BLACK;
+        this.strokeWidth = 1.0;
         Rectangle rectangle = new Rectangle();
         setJavaFXShape(rectangle);
         addHandlers();
@@ -28,12 +30,26 @@ public class RectangleShape extends Shapes {
         rectangle.setY(startY);
         rectangle.setWidth(width);
         rectangle.setHeight(height);
-        rectangle.setFill(Color.TRANSPARENT);
+        rectangle.setFill(this.getFillColor());
         rectangle.setStrokeWidth(strokeWidth);
         rectangle.setStroke(color);
         return rectangle;
     }
+    @Override
+    public void setColor(Color color) {
+        this.color = color;
+        if (this.javafxShape != null) {
+            this.javafxShape.setStroke(color);
+        }
+    }
 
+    @Override
+    public void setStrokeWidth(double strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        if (this.javafxShape != null) {
+            this.javafxShape.setStrokeWidth(strokeWidth);
+        }
+    }
     public void setStart(double x, double y) {
         this.startX = x;
         this.startY = y;
@@ -52,8 +68,14 @@ public class RectangleShape extends Shapes {
     }
 
     private void addHandlers() {
-        this.javafxShape.setOnMousePressed(this::onMousePressed);
-        this.javafxShape.setOnMouseDragged(this::onMouseDragged);
+        this.javafxShape.setOnMousePressed(event -> {
+            event.consume();
+            this.onMousePressed(event);
+        });
+        this.javafxShape.setOnMouseDragged(event -> {
+            event.consume();
+            this.onMouseDragged(event);
+        });
     }
 
     private void onMousePressed(MouseEvent event) {

@@ -11,16 +11,23 @@ public class LineShape extends Shapes {
     private double endX;
     private double endY;
     private Color color;
-    private final double strokeWidth;
+    private double strokeWidth;
+
 
     public LineShape() {
-        this.color = Color.BLACK; // Default color
-        this.strokeWidth = 1.0; // Default stroke width
+        this.color = Color.BLACK;
+        this.strokeWidth = 1.0;
         Line line = new Line();
         setJavaFXShape(line);
-        addHandlers(); // Добавляем обработчики событий
+        addHandlers();
     }
-
+    @Override
+    public void setColor(Color color) {
+        this.color = color;
+        if (this.javafxShape != null) {
+            this.javafxShape.setStroke(color);
+        }
+    }
     @Override
     public Shape draw() {
         Line line = (Line) this.javafxShape;
@@ -32,12 +39,18 @@ public class LineShape extends Shapes {
         line.setStroke(this.color);
         return line;
     }
-
+    @Override
+    public void setStrokeWidth(double strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        if (this.javafxShape != null) {
+            this.javafxShape.setStrokeWidth(strokeWidth);
+        }
+    }
     @Override
     public void setStart(double x, double y) {
         this.startX = x;
         this.startY = y;
-        draw(); // Обновляем линию при установке начальной точки
+        draw();
     }
 
     @Override
@@ -48,7 +61,7 @@ public class LineShape extends Shapes {
     public void setEnd(double x, double y) {
         this.endX = x;
         this.endY = y;
-        draw(); // Обновляем линию при установке конечной точки
+        draw();
     }
 
     @Override
@@ -62,9 +75,18 @@ public class LineShape extends Shapes {
     }
 
     private void addHandlers() {
-        this.javafxShape.setOnMousePressed(this::onMousePressed);
-        this.javafxShape.setOnMouseDragged(this::onMouseDragged);
-        this.javafxShape.setOnMouseReleased(this::onMouseReleased);
+        this.javafxShape.setOnMousePressed(event -> {
+            event.consume(); // Предотвращаем всплытие события
+            this.onMousePressed(event);
+        });
+        this.javafxShape.setOnMouseDragged(event -> {
+            event.consume(); // Предотвращаем всплытие события
+            this.onMouseDragged(event);
+        });
+        this.javafxShape.setOnMouseReleased(event -> {
+            event.consume(); // Предотвращаем всплытие события
+            this.onMouseReleased(event);
+        });
     }
 
     private void onMousePressed(MouseEvent event) {
