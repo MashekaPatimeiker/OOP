@@ -31,9 +31,7 @@ public class PolygonShape extends Shapes {
     public Shape draw() {
         Polygon polygon = (Polygon) this.javafxShape;
         polygon.getPoints().clear();
-
-        // Начальный угол для горизонтального основания
-        double initialAngle = -Math.PI / 2; // -90 градусов (вершина вверху)
+        double initialAngle = -Math.PI / 2;
 
         for (int i = 0; i < sides; i++) {
             double angle = initialAngle + 2 * Math.PI * i / sides;
@@ -47,8 +45,6 @@ public class PolygonShape extends Shapes {
         polygon.setStroke(color);
         return polygon;
     }
-
-    // Остальные методы остаются без изменений
     @Override
     public void setColor(Color color) {
         this.color = color;
