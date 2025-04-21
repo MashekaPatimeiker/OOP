@@ -12,7 +12,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
-
 public class HelloApplication extends Application {
     @FXML
     public ColorPicker fillColorPicker;
@@ -28,6 +27,10 @@ public class HelloApplication extends Application {
     public ColorPicker rootColorPicker;
     @FXML
     private Pane drawingPane;
+    @FXML
+    private Button undoButton;
+    @FXML
+    private Button redoButton;
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -57,6 +60,8 @@ public class HelloApplication extends Application {
         Functions.addFigureDoubleClick(this.shapeChoiceBox, this.drawingPane,
                 this.rootColorPicker, this.fillColorPicker, this.depthScrollBar);
         Functions.addClearButton(this.clearPaneButton, this.drawingPane);
+        Functions.addUndoButton(this.undoButton, this.drawingPane);
+        Functions.addRedoButton(this.redoButton, this.drawingPane);
     }
 
     private void showPolygonSidesDialog() {

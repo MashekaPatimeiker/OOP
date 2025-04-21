@@ -18,6 +18,7 @@ public class Functions {
     private static Shapes currentShape = null;
     private static boolean isDrawingPolyline = false;
     private static Shapes selectedShape = null;
+    private static final HistoryManager historyManager = new HistoryManager();
 
     static {
         shapeMap.put("Line", (x, y) -> new LineShape());
@@ -63,6 +64,9 @@ public class Functions {
                 } else {
                     setupOtherShapeHandlers(drawingPane, currentShape);
                 }
+
+                // Сохраняем состояние после начала рисования новой фигуры
+                saveCurrentState(drawingPane);
             }
         });
     }
@@ -89,6 +93,8 @@ public class Functions {
                 isDrawingPolyline = false;
                 resetDrawingPaneHandlers(drawingPane);
                 currentShape = null;
+                // Сохраняем состояние после завершения полилинии
+                saveCurrentState(drawingPane);
             } else if (e.getCode() == KeyCode.ESCAPE) {
                 drawingPane.getChildren().remove(shape.draw());
                 shapesList.remove(shape);
@@ -111,14 +117,15 @@ public class Functions {
             if (shape instanceof PolygonShape) {
                 ((PolygonShape) shape).finishCreation();
             }
+            // Сохраняем состояние после завершения рисования фигуры
+            saveCurrentState(drawingPane);
         });
     }
 
     private static void updateDrawingPane(Pane drawingPane, Shapes shape) {
+        drawingPane.getChildren().removeIf(node -> node == shape.draw());
         Shape drawnShape = shape.draw();
-        if (!drawingPane.getChildren().contains(drawnShape)) {
-            drawingPane.getChildren().add(drawnShape);
-        }
+        drawingPane.getChildren().add(drawnShape);
     }
 
     private static void resetDrawingPaneHandlers(Pane drawingPane) {
@@ -132,6 +139,40 @@ public class Functions {
         clearPaneButton.setOnAction(event -> {
             drawingPane.getChildren().clear();
             shapesList.clear();
+            historyManager.clear();
         });
+    }
+
+    public static void addUndoButton(Button undoButton, Pane drawingPane) {
+        undoButton.setOnAction(event -> {
+            if (historyManager.canUndo()) {
+                List<Shapes> previousState = historyManager.undo();
+                shapesList.clear();
+                shapesList.addAll(previousState);
+                redrawAllShapes(drawingPane);
+            }
+        });
+    }
+
+    public static void addRedoButton(Button redoButton, Pane drawingPane) {
+        redoButton.setOnAction(event -> {
+            if (historyManager.canRedo()) {
+                List<Shapes> nextState = historyManager.redo();
+                shapesList.clear();
+                shapesList.addAll(nextState);
+                redrawAllShapes(drawingPane);
+            }
+        });
+    }
+
+    private static void saveCurrentState(Pane drawingPane) {
+        historyManager.saveState(new ArrayList<>(shapesList));
+    }
+
+    private static void redrawAllShapes(Pane drawingPane) {
+        drawingPane.getChildren().clear();
+        for (Shapes shape : shapesList) {
+            drawingPane.getChildren().add(shape.draw());
+        }
     }
 }
