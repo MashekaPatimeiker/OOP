@@ -14,7 +14,7 @@ public class EllipseShape extends Shapes {
     private double radiusY;
     private Color color;
     private double strokeWidth;
-    private boolean isFirstClick = true; // Track the click state
+    private boolean isFirstClick = true;
 
     public EllipseShape() {
         this.color = Color.BLACK;

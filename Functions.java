@@ -65,7 +65,6 @@ public class Functions {
                     setupOtherShapeHandlers(drawingPane, currentShape);
                 }
 
-                // Сохраняем состояние после начала рисования новой фигуры
                 saveCurrentState(drawingPane);
             }
         });
@@ -93,7 +92,6 @@ public class Functions {
                 isDrawingPolyline = false;
                 resetDrawingPaneHandlers(drawingPane);
                 currentShape = null;
-                // Сохраняем состояние после завершения полилинии
                 saveCurrentState(drawingPane);
             } else if (e.getCode() == KeyCode.ESCAPE) {
                 drawingPane.getChildren().remove(shape.draw());
@@ -117,7 +115,6 @@ public class Functions {
             if (shape instanceof PolygonShape) {
                 ((PolygonShape) shape).finishCreation();
             }
-            // Сохраняем состояние после завершения рисования фигуры
             saveCurrentState(drawingPane);
         });
     }

@@ -50,7 +50,6 @@ public class HelloApplication extends Application {
         this.depthScrollBar.setMax(20.0);
         this.depthScrollBar.setValue(1.0);
 
-        // Добавляем обработчик выбора фигуры
         this.shapeChoiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if ("Polygon".equals(newValue)) {
                 showPolygonSidesDialog();
@@ -70,7 +69,6 @@ public class HelloApplication extends Application {
         dialog.setHeaderText("Enter number of sides");
         dialog.setContentText("Sides (3-20):");
 
-        // Обработка результата диалога
         dialog.showAndWait().ifPresent(sidesStr -> {
             try {
                 int sides = Integer.parseInt(sidesStr);

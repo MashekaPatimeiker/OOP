@@ -60,7 +60,6 @@ public class PolylineShape extends Shapes {
 
     @Override
     public void updateShape(double x, double y) {
-        // Не требуется для полилинии
     }
 
     @Override
