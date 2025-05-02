@@ -4,9 +4,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.Shape;
-
-import static javafx.scene.paint.Color.TRANSPARENT;
-
 public class EllipseShape extends Shapes {
     private double centerX;
     private double centerY;

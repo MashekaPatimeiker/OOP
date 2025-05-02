@@ -5,13 +5,13 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ScrollBar;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
 import java.util.*;
 import java.util.function.BiFunction;
-
+import javafx.scene.input.MouseButton;
 public class Functions {
     private static final Map<String, BiFunction<Double, Double, Shapes>> shapeMap = new HashMap<>();
     private static final List<Shapes> shapesList = new ArrayList<>();
@@ -19,7 +19,18 @@ public class Functions {
     private static boolean isDrawingPolyline = false;
     private static Shapes selectedShape = null;
     private static final HistoryManager historyManager = new HistoryManager();
+    private static ChoiceBox<String> shapeChoiceBox;
+    private static ColorPicker rootColorPicker;
+    private static ColorPicker fillColorPicker;
+    private static ScrollBar depthScrollBar;
 
+    public static void initializeUIComponents(ChoiceBox<String> shapeCB, ColorPicker rootCP,
+                                              ColorPicker fillCP, ScrollBar depthSB) {
+        shapeChoiceBox = shapeCB;
+        rootColorPicker = rootCP;
+        fillColorPicker = fillCP;
+        depthScrollBar = depthSB;
+    }
     static {
         shapeMap.put("Line", (x, y) -> new LineShape());
         shapeMap.put("Ellipse", (x, y) -> new EllipseShape());
@@ -65,7 +76,7 @@ public class Functions {
                     setupOtherShapeHandlers(drawingPane, currentShape);
                 }
 
-                saveCurrentState(drawingPane);
+                saveCurrentState();
             }
         });
     }
@@ -80,28 +91,47 @@ public class Functions {
 
     private static void setupPolylineHandlers(Pane drawingPane, PolylineShape shape) {
         resetDrawingPaneHandlers(drawingPane);
+        Line[] previewLine = {null};
 
-        drawingPane.setOnMousePressed(e -> {
-            shape.addPoint(e.getX(), e.getY());
-            updateDrawingPane(drawingPane, shape);
-        });
-
-        drawingPane.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.ENTER) {
-                shape.finalizeShape(0, 0);
-                isDrawingPolyline = false;
-                resetDrawingPaneHandlers(drawingPane);
-                currentShape = null;
-                saveCurrentState(drawingPane);
-            } else if (e.getCode() == KeyCode.ESCAPE) {
-                drawingPane.getChildren().remove(shape.draw());
-                shapesList.remove(shape);
-                isDrawingPolyline = false;
-                resetDrawingPaneHandlers(drawingPane);
-                currentShape = null;
+        drawingPane.setOnMouseMoved(e -> {
+            if (previewLine[0] != null) {
+                drawingPane.getChildren().remove(previewLine[0]);
+            }
+            previewLine[0] = (Line) shape.createPreviewLine(e.getX(), e.getY());
+            if (previewLine[0] != null) {
+                drawingPane.getChildren().add(previewLine[0]);
             }
         });
+
+        drawingPane.setOnMouseClicked(e -> {
+            if (e.getButton() == MouseButton.PRIMARY) {
+                shape.addPoint(e.getX(), e.getY());
+                redrawPolyline(drawingPane, shape);
+            } else if (e.getButton() == MouseButton.SECONDARY) {
+                if (shape.hasLines()) {
+                    shape.finalizeShape(0, 0);
+                    isDrawingPolyline = false;
+                    currentShape = null;
+                    if (previewLine[0] != null) {
+                        drawingPane.getChildren().remove(previewLine[0]);
+                        previewLine[0] = null;
+                    }
+                    resetDrawingPaneHandlers(drawingPane);
+                    saveCurrentState();
+                    addFigureDoubleClick(shapeChoiceBox, drawingPane, rootColorPicker, fillColorPicker, depthScrollBar);
+                }
+            }
+        });
+
         drawingPane.requestFocus();
+    }
+
+    private static void redrawPolyline(Pane drawingPane, PolylineShape shape) {
+        drawingPane.getChildren().removeIf(node ->
+                node instanceof Line && shape.getLines().contains(node));
+        for (Line line : shape.getLines()) {
+            drawingPane.getChildren().add(line);
+        }
     }
 
     private static void setupOtherShapeHandlers(Pane drawingPane, Shapes shape) {
@@ -115,7 +145,7 @@ public class Functions {
             if (shape instanceof PolygonShape) {
                 ((PolygonShape) shape).finishCreation();
             }
-            saveCurrentState(drawingPane);
+            saveCurrentState();
         });
     }
 
@@ -137,6 +167,9 @@ public class Functions {
             drawingPane.getChildren().clear();
             shapesList.clear();
             historyManager.clear();
+            currentShape = null;
+            isDrawingPolyline = false;
+            selectedShape = null;
         });
     }
 
@@ -162,14 +195,26 @@ public class Functions {
         });
     }
 
-    private static void saveCurrentState(Pane drawingPane) {
+    private static void saveCurrentState() {
         historyManager.saveState(new ArrayList<>(shapesList));
     }
 
     private static void redrawAllShapes(Pane drawingPane) {
         drawingPane.getChildren().clear();
         for (Shapes shape : shapesList) {
-            drawingPane.getChildren().add(shape.draw());
+            if (shape instanceof PolylineShape) {
+                PolylineShape polyline = (PolylineShape) shape;
+                if (polyline.isFinalized()) {
+                    for (Line line : polyline.getLines()) {
+                        drawingPane.getChildren().add(line);
+                    }
+                }
+            } else {
+                Shape drawnShape = shape.draw();
+                if (drawnShape != null) {
+                    drawingPane.getChildren().add(drawnShape);
+                }
+            }
         }
     }
 }

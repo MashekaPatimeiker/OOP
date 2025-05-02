@@ -1,15 +1,12 @@
 package com.example.demo3;
 
 import com.example.demo3.javataskclasses.PolygonShape;
-import com.example.demo3.javataskclasses.Shapes;
 import javafx.application.Application;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 public class HelloApplication extends Application {
@@ -49,7 +46,7 @@ public class HelloApplication extends Application {
         this.depthScrollBar.setMin(1.0);
         this.depthScrollBar.setMax(20.0);
         this.depthScrollBar.setValue(1.0);
-
+        Functions.initializeUIComponents(shapeChoiceBox, rootColorPicker, fillColorPicker, depthScrollBar);
         this.shapeChoiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if ("Polygon".equals(newValue)) {
                 showPolygonSidesDialog();
@@ -73,19 +70,19 @@ public class HelloApplication extends Application {
             try {
                 int sides = Integer.parseInt(sidesStr);
                 if (sides < 3 || sides > 20) {
-                    showAlert("Invalid input", "Number of sides must be between 3 and 20");
+                    showAlert("Number of sides must be between 3 and 20");
                 } else {
                     PolygonShape.setDefaultSides(sides);
                 }
             } catch (NumberFormatException e) {
-                showAlert("Invalid input", "Please enter a valid number");
+                showAlert("Please enter a valid number");
             }
         });
     }
 
-    private void showAlert(String title, String message) {
+    private void showAlert(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
+        alert.setTitle("Invalid input");
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();

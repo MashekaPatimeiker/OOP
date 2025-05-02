@@ -10,20 +10,18 @@ public abstract class Shapes {
     private Color fillColor = Color.TRANSPARENT;
     private boolean resizing = false;
     private boolean moving = false;
-    private boolean isBeingCreated = true; // Флаг, указывающий, что фигура в процессе создания
+    private boolean isBeingCreated = true;
     private double mouseX;
     private double mouseY;
     private double initialX;
     private double initialY;
     private double initialWidth;
     private double initialHeight;
-    private boolean isSelected = false;
 
     public Shapes() {
     }
 
     public void setSelected(boolean selected) {
-        this.isSelected = selected;
         if (this.javafxShape != null) {
             if (selected) {
                 this.javafxShape.setStrokeWidth(this.javafxShape.getStrokeWidth() * 2);
@@ -150,7 +148,6 @@ public abstract class Shapes {
         this.javafxShape.setScaleY(newHeight / this.initialHeight);
     }
 
-    // Метод для завершения создания фигуры (можно вызвать извне, если нужно)
     public void finishCreation() {
         this.isBeingCreated = false;
     }
