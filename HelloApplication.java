@@ -33,7 +33,7 @@ public class HelloApplication extends Application {
     public void start(Stage stage) throws Exception {
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("hello-view.fxml"));
         Pane root = (Pane) fxmlLoader.load();
-        Scene scene = new Scene(root, 694, 464);
+        Scene scene = new Scene(root, 800, 550);
         stage.setTitle("Figures");
         stage.setScene(scene);
         stage.show();

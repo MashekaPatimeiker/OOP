@@ -79,7 +79,6 @@ public abstract class Shapes {
                 event.consume();
                 this.resizing = false;
                 this.moving = false;
-                // После отпускания кнопки мыши считаем, что создание завершено
                 this.isBeingCreated = false;
             });
         }
@@ -96,13 +95,12 @@ public abstract class Shapes {
         if (event.isShiftDown()) {
             this.moving = true;
         } else if (this.isBeingCreated || this.isOnBorder(event)) {
-            // Разрешаем ресайз только если фигура в процессе создания или если клик на границе
             this.resizing = true;
         }
     }
 
     private void onMouseDragged(MouseEvent event) {
-        if (this.resizing && this.isBeingCreated) { // Ресайз только во время создания
+        if (this.resizing && this.isBeingCreated) {
             resize(event);
         } else if (this.moving) {
             double deltaX = event.getSceneX() - this.mouseX;
