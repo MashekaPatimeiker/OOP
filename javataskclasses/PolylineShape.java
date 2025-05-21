@@ -18,7 +18,13 @@ public class PolylineShape extends Shapes {
         this.color = Color.BLACK;
         this.strokeWidth = 1.0;
     }
-
+    public void clearAll() {
+        lines.clear();
+        lastX = 0;
+        lastY = 0;
+        isFirstPoint = true;
+        isFinalized = false;
+    }
     @Override
     public Shape draw() {
         if (isFinalized || lines.isEmpty()) {
@@ -104,4 +110,5 @@ public class PolylineShape extends Shapes {
     public boolean hasLines() {
         return !lines.isEmpty();
     }
+
 }

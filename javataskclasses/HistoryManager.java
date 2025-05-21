@@ -11,8 +11,10 @@ public class HistoryManager {
     private List<Shapes> currentState = new ArrayList<>();
 
     public void saveState(List<Shapes> shapes) {
+        List<Shapes> filteredState = filterFinalizedShapes(shapes);
+
         undoStack.push(new ArrayList<>(currentState));
-        currentState = new ArrayList<>(shapes);
+        currentState = new ArrayList<>(filteredState);
         redoStack.clear();
     }
 
@@ -46,5 +48,15 @@ public class HistoryManager {
         undoStack.clear();
         redoStack.clear();
         currentState.clear();
+    }
+
+    private List<Shapes> filterFinalizedShapes(List<Shapes> shapes) {
+        List<Shapes> result = new ArrayList<>();
+        for (Shapes shape : shapes) {
+            if (!(shape instanceof PolylineShape) || ((PolylineShape) shape).isFinalized()) {
+                result.add(shape);
+            }
+        }
+        return result;
     }
 }

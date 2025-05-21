@@ -24,19 +24,20 @@ public class Functions {
     private static ColorPicker fillColorPicker;
     private static ScrollBar depthScrollBar;
 
-    public static void initializeUIComponents(ChoiceBox<String> shapeCB, ColorPicker rootCP,
-                                              ColorPicker fillCP, ScrollBar depthSB) {
-        shapeChoiceBox = shapeCB;
-        rootColorPicker = rootCP;
-        fillColorPicker = fillCP;
-        depthScrollBar = depthSB;
-    }
     static {
         shapeMap.put("Line", (x, y) -> new LineShape());
         shapeMap.put("Ellipse", (x, y) -> new EllipseShape());
         shapeMap.put("Polygon", (x, y) -> new PolygonShape());
         shapeMap.put("Rectangle", (x, y) -> new RectangleShape());
         shapeMap.put("Polyline", (x, y) -> new PolylineShape());
+    }
+
+    public static void initializeUIComponents(ChoiceBox<String> shapeCB, ColorPicker rootCP,
+                                              ColorPicker fillCP, ScrollBar depthSB) {
+        shapeChoiceBox = shapeCB;
+        rootColorPicker = rootCP;
+        fillColorPicker = fillCP;
+        depthScrollBar = depthSB;
     }
 
     public static void setSelectedShape(Shapes shape) {
@@ -164,12 +165,21 @@ public class Functions {
 
     public static void addClearButton(Button clearPaneButton, Pane drawingPane) {
         clearPaneButton.setOnAction(event -> {
+            for (Shapes shape : shapesList) {
+                if (shape instanceof PolylineShape) {
+                    ((PolylineShape) shape).clearAll();
+                }
+            }
+
             drawingPane.getChildren().clear();
+
             shapesList.clear();
             historyManager.clear();
             currentShape = null;
             isDrawingPolyline = false;
-            selectedShape = null;
+
+            resetDrawingPaneHandlers(drawingPane);
+            addFigureDoubleClick(shapeChoiceBox, drawingPane, rootColorPicker, fillColorPicker, depthScrollBar);
         });
     }
 
@@ -196,9 +206,10 @@ public class Functions {
     }
 
     private static void saveCurrentState() {
-        historyManager.saveState(new ArrayList<>(shapesList));
+        if (!isDrawingPolyline || (currentShape instanceof PolylineShape && ((PolylineShape) currentShape).isFinalized())) {
+            historyManager.saveState(new ArrayList<>(shapesList));
+        }
     }
-
     private static void redrawAllShapes(Pane drawingPane) {
         drawingPane.getChildren().clear();
         for (Shapes shape : shapesList) {
