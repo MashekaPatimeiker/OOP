@@ -2,7 +2,6 @@ package com.example.demo3;
 
 import com.example.demo3.javataskclasses.*;
 import com.example.demo3.javataskclasses.myshapes.*;
-import com.example.demo3.manager.Controllers;
 import com.example.demo3.manager.HistoryManager;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -16,7 +15,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import javafx.scene.input.MouseButton;
 
-public final class Functions {
+public class Functions {
     private static final Map<String, BiFunction<Double, Double, Shapes>> shapeMap = new HashMap<>();
     private static final List<Shapes> shapesList = new ArrayList<>();
     private static Shapes currentShape = null;
@@ -27,10 +26,6 @@ public final class Functions {
     private static ColorPicker rootColorPicker;
     private static ColorPicker fillColorPicker;
     private static ScrollBar depthScrollBar;
-
-    private Functions() {
-        throw new AssertionError("Cannot instantiate utility class");
-    }
 
     static {
         shapeMap.put("Line", (x, y) -> new LineShape());
@@ -62,24 +57,8 @@ public final class Functions {
         return selectedShape;
     }
 
-    public static HistoryManager getHistoryManager() {
-        return historyManager;
-    }
-
-    public static void setCurrentShape(Shapes shape) {
-        currentShape = shape;
-    }
-
-    public static void setIsDrawingPolyline(boolean isDrawing) {
-        isDrawingPolyline = isDrawing;
-    }
-
     public static void addFigureDoubleClick(Pane drawingPane) {
         drawingPane.setOnMousePressed(event -> {
-            if (event.getTarget() instanceof Shape || isDrawingPolyline) {
-                return;
-            }
-
             String selectedShape = shapeChoiceBox.getValue();
             if (shapeMap.containsKey(selectedShape)) {
                 currentShape = createShape(selectedShape, event.getX(), event.getY(),
@@ -88,7 +67,7 @@ public final class Functions {
                 shapesList.add(currentShape);
                 currentShape.setStart(event.getX(), event.getY());
 
-                if ("Polyline".equals(selectedShape)) {
+                if (Objects.equals(shapeChoiceBox.getValue(), "Polyline")) {
                     isDrawingPolyline = true;
                     setupPolylineHandlers(drawingPane, (PolylineShape) currentShape);
                 } else {
@@ -127,16 +106,18 @@ public final class Functions {
                 shape.addPoint(e.getX(), e.getY());
                 redrawPolyline(drawingPane, shape);
             } else if (e.getButton() == MouseButton.SECONDARY) {
-                shape.finalizeShape(0, 0);
-                isDrawingPolyline = false;
-                currentShape = null;
-                if (previewLine[0] != null) {
-                    drawingPane.getChildren().remove(previewLine[0]);
-                    previewLine[0] = null;
+                if (shape.hasLines()) {
+                    shape.finalizeShape(0, 0);
+                    isDrawingPolyline = false;
+                    currentShape = null;
+                    if (previewLine[0] != null) {
+                        drawingPane.getChildren().remove(previewLine[0]);
+                        previewLine[0] = null;
+                    }
+                    resetDrawingPaneHandlers(drawingPane);
+                    saveCurrentState();
+                    addFigureDoubleClick(drawingPane);
                 }
-                resetDrawingPaneHandlers(drawingPane);
-                saveCurrentState();
-                addFigureDoubleClick(drawingPane);
             }
         });
 
@@ -158,17 +139,18 @@ public final class Functions {
 
         drawingPane.setOnMouseReleased(e -> {
             shape.finalizeShape(e.getX(), e.getY());
+            shape.finishCreation();
             saveCurrentState();
         });
     }
 
     private static void updateDrawingPane(Pane drawingPane, Shapes shape) {
-        drawingPane.getChildren().remove(shape.draw());
+        drawingPane.getChildren().removeIf(node -> node == shape.draw());
         Shape drawnShape = shape.draw();
         drawingPane.getChildren().add(drawnShape);
     }
 
-    public static void resetDrawingPaneHandlers(Pane drawingPane) {
+    private static void resetDrawingPaneHandlers(Pane drawingPane) {
         drawingPane.setOnMousePressed(null);
         drawingPane.setOnMouseDragged(null);
         drawingPane.setOnMouseReleased(null);
@@ -176,15 +158,38 @@ public final class Functions {
     }
 
     public static void addClearButton(Button clearPaneButton, Pane drawingPane) {
-        Controllers.addClearButton(clearPaneButton, drawingPane, shapesList);
+        clearPaneButton.setOnAction(event -> {
+            drawingPane.getChildren().clear();
+            shapesList.clear();
+            historyManager.clear();
+            currentShape = null;
+            isDrawingPolyline = false;
+
+            resetDrawingPaneHandlers(drawingPane);
+            addFigureDoubleClick(drawingPane);
+        });
     }
 
     public static void addUndoButton(Button undoButton, Pane drawingPane) {
-        Controllers.addUndoButton(undoButton, drawingPane, shapesList);
+        undoButton.setOnAction(event -> {
+            if (historyManager.canUndo()) {
+                List<Shapes> previousState = historyManager.undo();
+                shapesList.clear();
+                shapesList.addAll(previousState);
+                redrawAllShapes(drawingPane);
+            }
+        });
     }
 
     public static void addRedoButton(Button redoButton, Pane drawingPane) {
-        Controllers.addRedoButton(redoButton, drawingPane, shapesList);
+        redoButton.setOnAction(event -> {
+            if (historyManager.canRedo()) {
+                List<Shapes> nextState = historyManager.redo();
+                shapesList.clear();
+                shapesList.addAll(nextState);
+                redrawAllShapes(drawingPane);
+            }
+        });
     }
 
     private static void saveCurrentState() {
@@ -193,10 +198,13 @@ public final class Functions {
         }
     }
 
-    public static void redrawAllShapes(Pane drawingPane) {
+    private static void redrawAllShapes(Pane drawingPane) {
         drawingPane.getChildren().clear();
         for (Shapes shape : shapesList) {
-            shape.draw();
+            Shape drawnShape = shape.draw();
+            if (drawnShape != null) {
+                drawingPane.getChildren().add(drawnShape);
+            }
         }
     }
 }

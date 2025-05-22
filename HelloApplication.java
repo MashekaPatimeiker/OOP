@@ -47,8 +47,11 @@ public class HelloApplication extends Application {
         this.depthScrollBar.setMax(20.0);
         this.depthScrollBar.setValue(1.0);
         Functions.initializeUIComponents(shapeChoiceBox, rootColorPicker, fillColorPicker, depthScrollBar);
-
-        this.shapeChoiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> handleShapeSelection(newValue));
+        this.shapeChoiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if ("Polygon".equals(newValue)) {
+                showPolygonSidesDialog();
+            }
+        });
 
         Functions.addFigureDoubleClick(this.drawingPane);
         Functions.addClearButton(this.clearPaneButton, this.drawingPane);
@@ -56,13 +59,7 @@ public class HelloApplication extends Application {
         Functions.addRedoButton(this.redoButton, this.drawingPane);
     }
 
-    private void handleShapeSelection(String newValue) {
-        if ("Polygon".equals(newValue)) {
-            showPolygonSidesDialog();
-        }
-    }
-
-    public void showPolygonSidesDialog() {
+    private void showPolygonSidesDialog() {
         TextInputDialog dialog = new TextInputDialog("5");
         dialog.setTitle("Polygon Settings");
         dialog.setHeaderText("Enter number of sides");

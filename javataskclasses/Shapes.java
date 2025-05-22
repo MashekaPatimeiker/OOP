@@ -155,15 +155,4 @@ public abstract class Shapes {
     public abstract void setStart(double x, double y);
     public abstract void reset();
 
-    public void clear() {
-        if (this.javafxShape != null) {
-            this.javafxShape.setVisible(false);
-            this.javafxShape.setTranslateX(0);
-            this.javafxShape.setTranslateY(0);
-            this.javafxShape.setScaleX(1);
-            this.javafxShape.setScaleY(1);
-            this.javafxShape.setFill(Color.TRANSPARENT);
-            this.javafxShape.setStroke(Color.TRANSPARENT);
-        }
-    }
 }
