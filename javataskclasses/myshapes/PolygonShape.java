@@ -1,25 +1,50 @@
-package com.example.demo3.javataskclasses;
+package com.example.demo3.javataskclasses.myshapes;
 
+import com.example.demo3.javataskclasses.Shapes;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
+import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Shape;
 
-public class LineShape extends Shapes {
-    private double startX;
-    private double startY;
-    private double endX;
-    private double endY;
+public class PolygonShape extends Shapes {
+    private double centerX;
+    private double centerY;
+    private double radius;
+    private final int sides;
     private Color color;
     private double strokeWidth;
+    private static int defaultSides = 5;
 
-
-    public LineShape() {
+    public PolygonShape() {
         this.color = Color.BLACK;
         this.strokeWidth = 1.0;
-        Line line = new Line();
-        setJavaFXShape(line);
+        this.sides = defaultSides;
+        Polygon polygon = new Polygon();
+        setJavaFXShape(polygon);
         addHandlers();
+    }
+
+    public static void setDefaultSides(int sides) {
+        defaultSides = Math.max(3, Math.min(20, sides));
+    }
+
+    @Override
+    public Shape draw() {
+        Polygon polygon = (Polygon) this.javafxShape;
+        polygon.getPoints().clear();
+        double initialAngle = -Math.PI / 2;
+
+        for (int i = 0; i < sides; i++) {
+            double angle = initialAngle + 2 * Math.PI * i / sides;
+            double x = centerX + radius * Math.cos(angle);
+            double y = centerY + radius * Math.sin(angle);
+            polygon.getPoints().addAll(x, y);
+        }
+
+        polygon.setFill(this.getFillColor());
+        polygon.setStrokeWidth(strokeWidth);
+        polygon.setStroke(color);
+        return polygon;
     }
     @Override
     public void setColor(Color color) {
@@ -28,17 +53,7 @@ public class LineShape extends Shapes {
             this.javafxShape.setStroke(color);
         }
     }
-    @Override
-    public Shape draw() {
-        Line line = (Line) this.javafxShape;
-        line.setStartX(this.startX);
-        line.setStartY(this.startY);
-        line.setEndX(this.endX);
-        line.setEndY(this.endY);
-        line.setStrokeWidth(this.strokeWidth);
-        line.setStroke(this.color);
-        return line;
-    }
+
     @Override
     public void setStrokeWidth(double strokeWidth) {
         this.strokeWidth = strokeWidth;
@@ -46,45 +61,44 @@ public class LineShape extends Shapes {
             this.javafxShape.setStrokeWidth(strokeWidth);
         }
     }
+
     @Override
     public void setStart(double x, double y) {
-        this.startX = x;
-        this.startY = y;
+        this.centerX = x;
+        this.centerY = y;
+        this.radius = 0;
         draw();
     }
 
     @Override
     public void reset() {
-
-    }
-
-    public void setEnd(double x, double y) {
-        this.endX = x;
-        this.endY = y;
+        this.radius = 0;
         draw();
     }
 
     @Override
     public void updateShape(double x, double y) {
-        setEnd(x, y); // Обновляем конечную точку линии
+        this.radius = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+        draw();
     }
 
     @Override
     public void finalizeShape(double x, double y) {
-        setEnd(x, y); // Завершаем рисование, устанавливая конечную точку
+        this.radius = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+        draw();
     }
 
     private void addHandlers() {
         this.javafxShape.setOnMousePressed(event -> {
-            event.consume(); // Предотвращаем всплытие события
+            event.consume();
             this.onMousePressed(event);
         });
         this.javafxShape.setOnMouseDragged(event -> {
-            event.consume(); // Предотвращаем всплытие события
+            event.consume();
             this.onMouseDragged(event);
         });
         this.javafxShape.setOnMouseReleased(event -> {
-            event.consume(); // Предотвращаем всплытие события
+            event.consume();
             this.onMouseReleased(event);
         });
     }

@@ -1,6 +1,6 @@
 package com.example.demo3;
 
-import com.example.demo3.javataskclasses.PolygonShape;
+import com.example.demo3.javataskclasses.myshapes.PolygonShape;
 import javafx.application.Application;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -47,20 +47,22 @@ public class HelloApplication extends Application {
         this.depthScrollBar.setMax(20.0);
         this.depthScrollBar.setValue(1.0);
         Functions.initializeUIComponents(shapeChoiceBox, rootColorPicker, fillColorPicker, depthScrollBar);
-        this.shapeChoiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if ("Polygon".equals(newValue)) {
-                showPolygonSidesDialog();
-            }
-        });
 
-        Functions.addFigureDoubleClick(this.shapeChoiceBox, this.drawingPane,
-                this.rootColorPicker, this.fillColorPicker, this.depthScrollBar);
+        this.shapeChoiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> handleShapeSelection(newValue));
+
+        Functions.addFigureDoubleClick(this.drawingPane);
         Functions.addClearButton(this.clearPaneButton, this.drawingPane);
         Functions.addUndoButton(this.undoButton, this.drawingPane);
         Functions.addRedoButton(this.redoButton, this.drawingPane);
     }
 
-    private void showPolygonSidesDialog() {
+    private void handleShapeSelection(String newValue) {
+        if ("Polygon".equals(newValue)) {
+            showPolygonSidesDialog();
+        }
+    }
+
+    public void showPolygonSidesDialog() {
         TextInputDialog dialog = new TextInputDialog("5");
         dialog.setTitle("Polygon Settings");
         dialog.setHeaderText("Enter number of sides");

@@ -1,4 +1,7 @@
-package com.example.demo3.javataskclasses;
+package com.example.demo3.manager;
+
+import com.example.demo3.javataskclasses.myshapes.PolylineShape;
+import com.example.demo3.javataskclasses.Shapes;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;

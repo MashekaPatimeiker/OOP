@@ -1,5 +1,6 @@
-package com.example.demo3.javataskclasses;
+package com.example.demo3.javataskclasses.myshapes;
 
+import com.example.demo3.javataskclasses.Shapes;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Ellipse;
