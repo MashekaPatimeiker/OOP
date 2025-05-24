@@ -11,7 +11,7 @@ public class TrapezoidPlugin implements ShapePlugin {
 
     @Override
     public Shapes createShape() {
-        return new TrapezoidShape.Trapezoid();  // This works because Trapezoid extends Shapes
+        return new TrapezoidShape.Trapezoid();
     }
 
     @Override

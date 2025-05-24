@@ -53,7 +53,6 @@ public class HelloApplication extends Application {
         Functions.addUndoButton(this.undoButton, this.drawingPane);
         Functions.addRedoButton(this.redoButton, this.drawingPane);
 
-        // Добавляем обработчики для меню File
         saveMenuItem.setOnAction(event -> saveShapesToFile());
         openMenuItem.setOnAction(event -> loadShapesFromFile());
     }
@@ -104,7 +103,6 @@ public class HelloApplication extends Application {
         fileChooser.setTitle("Select Plugin JAR File");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JAR Files", "*.jar"));
 
-        // Указываем папку plugins по умолчанию (если она существует)
         File pluginsDir = new File("plugins");
         if (pluginsDir.exists()) {
             fileChooser.setInitialDirectory(pluginsDir);
@@ -114,7 +112,6 @@ public class HelloApplication extends Application {
 
         if (selectedFile != null) {
             try {
-                // Загружаем конкретный JAR-файл
                 Functions.loadPluginFromJar(selectedFile.getAbsolutePath());
                 showInfoAlert("Plugin loaded successfully: " + selectedFile.getName());
             } catch (Exception e) {

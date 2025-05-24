@@ -41,10 +41,10 @@ public class TrapezoidShape {
 
             polygon.getPoints().clear();
             polygon.getPoints().addAll(
-                    left, top + height,                // Bottom left
-                    left + width, top + height,        // Bottom right
-                    left + width - topOffset, top,     // Top right
-                    left + topOffset, top              // Top left
+                    left, top + height,
+                    left + width, top + height,
+                    left + width - topOffset, top,
+                    left + topOffset, top
             );
         }
 
@@ -75,7 +75,6 @@ public class TrapezoidShape {
 
         @Override
         public void finishCreation() {
-            // Any finalization logic
         }
     }
 }

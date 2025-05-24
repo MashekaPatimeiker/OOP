@@ -59,7 +59,7 @@
                 Shape drawnShape = shape.draw();
                 if (drawnShape != null) {
                     drawingPane.getChildren().add(drawnShape);
-                    shapesList.add(shape); // Добавляем фигуру в список
+                    shapesList.add(shape);
                 }
             }
         }
@@ -71,11 +71,9 @@
                 return;
             }
 
-            // Добавляем плагин в коллекции
             plugins.put(shapeName, plugin);
             shapeMap.put(shapeName, (x, y) -> plugin.createShape());
 
-            // Обновляем ChoiceBox в UI потоке
             Platform.runLater(() -> {
                 if (!shapeChoiceBox.getItems().contains(shapeName)) {
                     shapeChoiceBox.getItems().add(shapeName);
@@ -90,13 +88,11 @@
                 File jarFile = new File(jarPath);
                 URL jarUrl = jarFile.toURI().toURL();
 
-                // Используем отдельный ClassLoader для каждого плагина
                 URLClassLoader pluginLoader = new URLClassLoader(
                         new URL[]{jarUrl},
                         Functions.class.getClassLoader()
                 );
 
-                // Читаем файл сервиса вручную
                 String serviceFile = "META-INF/services/com.example.demo3.plugin.ShapePlugin";
                 try (InputStream is = pluginLoader.getResourceAsStream(serviceFile)) {
                     if (is == null) {
@@ -108,7 +104,6 @@
                             .findFirst()
                             .orElseThrow(() -> new RuntimeException("Empty service file"));
 
-                    // Загружаем класс плагина
                     Class<?> pluginClass = pluginLoader.loadClass(pluginClassName);
                     ShapePlugin plugin = (ShapePlugin) pluginClass.getDeclaredConstructor().newInstance();
                     loadPlugin(plugin);
@@ -117,15 +112,6 @@
                 throw new RuntimeException("Failed to load plugin from: " + jarPath, e);
             }
         }
-        private static Shapes convertNodeToShape(Shape node) {
-            for (Shapes shape : shapesList) {
-                if (shape.draw() == node) {
-                    return shape;
-                }
-            }
-            return null;
-        }
-
         public static void setSelectedShape(Shapes shape) {
             if (selectedShape != null) {
                 selectedShape.setSelected(false);

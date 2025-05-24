@@ -5,6 +5,6 @@ import javafx.scene.control.MenuItem;
 
 public interface ShapePlugin {
     String getShapeName();
-    Shapes createShape();  // Changed return type to Shapes
+    Shapes createShape();
     MenuItem getMenuItem();
 }
