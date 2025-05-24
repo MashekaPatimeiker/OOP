@@ -47,45 +47,12 @@ public class HelloApplication extends Application {
         this.depthScrollBar.setMax(20.0);
         this.depthScrollBar.setValue(1.0);
         Functions.initializeUIComponents(shapeChoiceBox, rootColorPicker, fillColorPicker, depthScrollBar);
-        this.shapeChoiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if ("Polygon".equals(newValue)) {
-                showPolygonSidesDialog();
-            }
-        });
-
         Functions.addFigureDoubleClick(this.drawingPane);
         Functions.addClearButton(this.clearPaneButton, this.drawingPane);
         Functions.addUndoButton(this.undoButton, this.drawingPane);
         Functions.addRedoButton(this.redoButton, this.drawingPane);
     }
 
-    private void showPolygonSidesDialog() {
-        TextInputDialog dialog = new TextInputDialog("5");
-        dialog.setTitle("Polygon Settings");
-        dialog.setHeaderText("Enter number of sides");
-        dialog.setContentText("Sides (3-20):");
-
-        dialog.showAndWait().ifPresent(sidesStr -> {
-            try {
-                int sides = Integer.parseInt(sidesStr);
-                if (sides < 3 || sides > 20) {
-                    showAlert("Number of sides must be between 3 and 20");
-                } else {
-                    PolygonShape.setDefaultSides(sides);
-                }
-            } catch (NumberFormatException e) {
-                showAlert("Please enter a valid number");
-            }
-        });
-    }
-
-    private void showAlert(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Invalid input");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
 
     public static void main(String[] args) {
         launch();

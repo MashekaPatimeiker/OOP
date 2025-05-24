@@ -1,10 +1,14 @@
 package com.example.demo3.javataskclasses.myshapes;
 
 import com.example.demo3.javataskclasses.Shapes;
+import javafx.scene.control.Alert;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Shape;
+
+import java.util.Optional;
 
 public class PolygonShape extends Shapes {
     private double centerX;
@@ -13,7 +17,7 @@ public class PolygonShape extends Shapes {
     private final int sides;
     private Color color;
     private double strokeWidth;
-    private static int defaultSides = 5;
+    private static int defaultSides = 0;
 
     public PolygonShape() {
         this.color = Color.BLACK;
@@ -23,13 +27,51 @@ public class PolygonShape extends Shapes {
         setJavaFXShape(polygon);
         addHandlers();
     }
+    private static boolean showSidesDialogIfNeeded() {
+        if (defaultSides == 0) {
+            TextInputDialog dialog = new TextInputDialog("5");
+            dialog.setTitle("Polygon Settings");
+            dialog.setHeaderText("Enter number of sides");
+            dialog.setContentText("Sides (3-20):");
 
+            try {
+                Optional<String> result = dialog.showAndWait();
+                if (result.isPresent()) {
+                    int sides = Integer.parseInt(result.get());
+                    if (sides < 3 || sides > 20) {
+                        showAlert("Number of sides must be between 3 and 20");
+                        return false;
+                    } else {
+                        defaultSides = sides;
+                        return true;
+                    }
+                }
+            } catch (NumberFormatException e) {
+                showAlert("Please enter a valid number");
+                return false;
+            }
+            return false;
+        }
+        return true;
+    }
+
+    private static void showAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Invalid input");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
     public static void setDefaultSides(int sides) {
         defaultSides = Math.max(3, Math.min(20, sides));
     }
 
     @Override
     public Shape draw() {
+        if (!showSidesDialogIfNeeded()) {
+            return null;
+        }
+
         Polygon polygon = (Polygon) this.javafxShape;
         polygon.getPoints().clear();
         double initialAngle = -Math.PI / 2;
