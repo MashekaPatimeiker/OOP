@@ -98,7 +98,39 @@ public class HelloApplication extends Application {
         alert.setContentText(message);
         alert.showAndWait();
     }
+    @FXML
+    private void addPlugins() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select Plugin JAR File");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JAR Files", "*.jar"));
 
+        // Указываем папку plugins по умолчанию (если она существует)
+        File pluginsDir = new File("plugins");
+        if (pluginsDir.exists()) {
+            fileChooser.setInitialDirectory(pluginsDir);
+        }
+
+        File selectedFile = fileChooser.showOpenDialog(drawingPane.getScene().getWindow());
+
+        if (selectedFile != null) {
+            try {
+                // Загружаем конкретный JAR-файл
+                Functions.loadPluginFromJar(selectedFile.getAbsolutePath());
+                showInfoAlert("Plugin loaded successfully: " + selectedFile.getName());
+            } catch (Exception e) {
+                showErrorAlert("Error loading plugin: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void showInfoAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Information");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
     public static void main(String[] args) {
         launch();
     }

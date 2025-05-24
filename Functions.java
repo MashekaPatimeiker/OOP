@@ -3,6 +3,8 @@
     import com.example.demo3.javataskclasses.*;
     import com.example.demo3.javataskclasses.myshapes.*;
     import com.example.demo3.manager.HistoryManager;
+    import com.example.demo3.plugin.ShapePlugin;
+    import javafx.application.Platform;
     import javafx.scene.control.Button;
     import javafx.scene.control.ChoiceBox;
     import javafx.scene.control.ColorPicker;
@@ -11,12 +13,17 @@
     import javafx.scene.paint.Color;
     import javafx.scene.shape.Line;
     import javafx.scene.shape.Shape;
+
+    import java.io.*;
+    import java.net.URL;
+    import java.net.URLClassLoader;
     import java.util.*;
     import java.util.function.BiFunction;
     import javafx.scene.input.MouseButton;
 
     public class Functions {
         private static final Map<String, BiFunction<Double, Double, Shapes>> shapeMap = new HashMap<>();
+        private static final Map<String, ShapePlugin> plugins = new HashMap<>();
         static final List<Shapes> shapesList = new ArrayList<>();
         private static Shapes currentShape = null;
         private static boolean isDrawingPolyline = false;
@@ -56,7 +63,60 @@
                 }
             }
         }
+        public static void loadPlugin(ShapePlugin plugin) {
+            String shapeName = plugin.getShapeName();
 
+            if (plugins.containsKey(shapeName)) {
+                System.out.println("Plugin already loaded: " + shapeName);
+                return;
+            }
+
+            // Добавляем плагин в коллекции
+            plugins.put(shapeName, plugin);
+            shapeMap.put(shapeName, (x, y) -> plugin.createShape());
+
+            // Обновляем ChoiceBox в UI потоке
+            Platform.runLater(() -> {
+                if (!shapeChoiceBox.getItems().contains(shapeName)) {
+                    shapeChoiceBox.getItems().add(shapeName);
+                    System.out.println("Added shape to ChoiceBox: " + shapeName);
+                }
+            });
+
+            System.out.println("Successfully loaded plugin: " + shapeName);
+        }
+        public static void loadPluginFromJar(String jarPath) {
+            try {
+                File jarFile = new File(jarPath);
+                URL jarUrl = jarFile.toURI().toURL();
+
+                // Используем отдельный ClassLoader для каждого плагина
+                URLClassLoader pluginLoader = new URLClassLoader(
+                        new URL[]{jarUrl},
+                        Functions.class.getClassLoader()
+                );
+
+                // Читаем файл сервиса вручную
+                String serviceFile = "META-INF/services/com.example.demo3.plugin.ShapePlugin";
+                try (InputStream is = pluginLoader.getResourceAsStream(serviceFile)) {
+                    if (is == null) {
+                        throw new RuntimeException("Service file not found in JAR: " + serviceFile);
+                    }
+
+                    String pluginClassName = new BufferedReader(new InputStreamReader(is))
+                            .lines()
+                            .findFirst()
+                            .orElseThrow(() -> new RuntimeException("Empty service file"));
+
+                    // Загружаем класс плагина
+                    Class<?> pluginClass = pluginLoader.loadClass(pluginClassName);
+                    ShapePlugin plugin = (ShapePlugin) pluginClass.getDeclaredConstructor().newInstance();
+                    loadPlugin(plugin);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to load plugin from: " + jarPath, e);
+            }
+        }
         private static Shapes convertNodeToShape(Shape node) {
             for (Shapes shape : shapesList) {
                 if (shape.draw() == node) {
