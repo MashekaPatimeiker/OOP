@@ -6,6 +6,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 
+import java.util.Map;
+
 public class RectangleShape extends Shapes {
     private double startX;
     private double startY;
@@ -41,7 +43,32 @@ public class RectangleShape extends Shapes {
             this.javafxShape.setStroke(color);
         }
     }
+    @Override
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = super.toMap();
+        map.put("startX", startX);
+        map.put("startY", startY);
+        map.put("width", width);
+        map.put("height", height);
+        return map;
+    }
 
+    @Override
+    public void fromMap(Map<String, Object> map) {
+        super.fromMap(map);
+        this.startX = ((Number) map.get("startX")).doubleValue();
+        this.startY = ((Number) map.get("startY")).doubleValue();
+        this.width = ((Number) map.get("width")).doubleValue();
+        this.height = ((Number) map.get("height")).doubleValue();
+        this.color = Color.web((String) map.get("strokeColor"));
+        this.strokeWidth = ((Number) map.get("strokeWidth")).doubleValue();
+        draw();
+    }
+
+    @Override
+    protected String getShapeType() {
+        return "Rectangle";
+    }
     @Override
     public void setStrokeWidth(double strokeWidth) {
         this.strokeWidth = strokeWidth;

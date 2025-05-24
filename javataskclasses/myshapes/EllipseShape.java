@@ -5,7 +5,10 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.Shape;
-    public class EllipseShape extends Shapes {
+
+import java.util.Map;
+
+public class EllipseShape extends Shapes {
     private double centerX;
     private double centerY;
     private double radiusX;
@@ -21,7 +24,32 @@ import javafx.scene.shape.Shape;
         setJavaFXShape(ellipse);
         addHandlers();
     }
+        @Override
+        public Map<String, Object> toMap() {
+            Map<String, Object> map = super.toMap();
+            map.put("centerX", centerX);
+            map.put("centerY", centerY);
+            map.put("radiusX", radiusX);
+            map.put("radiusY", radiusY);
+            return map;
+        }
 
+    @Override
+    public void fromMap(Map<String, Object> map) {
+        super.fromMap(map);
+        this.centerX = ((Number) map.get("centerX")).doubleValue();
+        this.centerY = ((Number) map.get("centerY")).doubleValue();
+        this.radiusX = ((Number) map.get("radiusX")).doubleValue();
+        this.radiusY = ((Number) map.get("radiusY")).doubleValue();
+        this.color = Color.web((String) map.get("strokeColor"));
+        this.strokeWidth = ((Number) map.get("strokeWidth")).doubleValue();
+        draw();
+    }
+
+        @Override
+        protected String getShapeType() {
+            return "Ellipse";
+        }
     @Override
     public Shape draw() {
         Ellipse ellipse = (Ellipse) this.javafxShape;

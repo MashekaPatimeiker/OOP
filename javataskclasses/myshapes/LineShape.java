@@ -6,6 +6,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
 
+import java.util.Map;
+
 public class LineShape extends Shapes {
     private double startX;
     private double startY;
@@ -28,6 +30,31 @@ public class LineShape extends Shapes {
         if (this.javafxShape != null) {
             this.javafxShape.setStroke(color);
         }
+    }
+    @Override
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = super.toMap();
+        map.put("startX", startX);
+        map.put("startY", startY);
+        map.put("endX", endX);
+        map.put("endY", endY);
+        return map;
+    }
+
+    @Override
+    public void fromMap(Map<String, Object> map) {
+        super.fromMap(map);
+        this.startX = ((Number) map.get("startX")).doubleValue();
+        this.startY = ((Number) map.get("startY")).doubleValue();
+        this.endX = ((Number) map.get("endX")).doubleValue();
+        this.endY = ((Number) map.get("endY")).doubleValue();
+        this.color = Color.web((String) map.get("strokeColor"));
+        this.strokeWidth = ((Number) map.get("strokeWidth")).doubleValue();
+        draw();
+    }
+    @Override
+    protected String getShapeType() {
+        return "Line";
     }
     @Override
     public Shape draw() {

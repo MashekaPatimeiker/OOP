@@ -8,13 +8,14 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Shape;
 
+import java.util.Map;
 import java.util.Optional;
 
 public class PolygonShape extends Shapes {
     private double centerX;
     private double centerY;
     private double radius;
-    private final int sides;
+    private int sides;
     private Color color;
     private double strokeWidth;
     private static int defaultSides = 0;
@@ -54,7 +55,10 @@ public class PolygonShape extends Shapes {
         }
         return true;
     }
-
+    @Override
+    protected String getShapeType() {
+        return "Polygon";
+    }
     private static void showAlert(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Invalid input");
@@ -145,6 +149,27 @@ public class PolygonShape extends Shapes {
         });
     }
 
+    @Override
+    public Map<String, Object> toMap() {
+        Map<String, Object> map = super.toMap();
+        map.put("centerX", centerX);
+        map.put("centerY", centerY);
+        map.put("radius", radius);
+        map.put("sides", sides);
+        return map;
+    }
+
+    @Override
+    public void fromMap(Map<String, Object> map) {
+        super.fromMap(map);
+        this.centerX = ((Number) map.get("centerX")).doubleValue();
+        this.centerY = ((Number) map.get("centerY")).doubleValue();
+        this.radius = ((Number) map.get("radius")).doubleValue();
+        this.sides = ((Number) map.get("sides")).intValue();
+        this.color = Color.web((String) map.get("strokeColor"));
+        this.strokeWidth = ((Number) map.get("strokeWidth")).doubleValue();
+        draw();
+    }
     private void onMousePressed(MouseEvent event) {
         setStart(event.getX(), event.getY());
     }
