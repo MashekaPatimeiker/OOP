@@ -14,6 +14,7 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.util.List;
 
+import static com.example.demo3.Functions.historyManager;
 import static com.example.demo3.Functions.shapesList;
 
 public class HelloApplication extends Application {
@@ -60,16 +61,18 @@ public class HelloApplication extends Application {
     @FXML
     private void saveShapesToFile() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Save Shapes");
-        fileChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("JSON Files", "*.json"));
+        fileChooser.setTitle("Сохранить фигуры");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON Files", "*.json"));
         File file = fileChooser.showSaveDialog(drawingPane.getScene().getWindow());
 
         if (file != null) {
-            List<com.example.demo3.javataskclasses.Shapes> shapes = Functions.getShapesFromPane(drawingPane);
+            List<Shapes> shapes = Functions.getShapesFromPane(drawingPane);
             ShapeSerializer.saveToFile(shapes, file);
+
+            historyManager.saveState(shapes);
         }
     }
+
 
     @FXML
     private void loadShapesFromFile() {
@@ -83,12 +86,21 @@ public class HelloApplication extends Application {
                 drawingPane.getChildren().clear();
                 shapesList.clear();
                 Functions.addShapesToPane(shapes, drawingPane);
+
+                historyManager.loadState(shapes);
+
+            } catch (ShapeSerializer.MissingPluginException e) {
+                showErrorAlert("Не удалось загрузить фигуры: " + e.getMessage() +
+                        "\nПожалуйста, сначала загрузите необходимые плагины.");
             } catch (Exception e) {
-                showErrorAlert("Error loading file: " + e.getMessage());
+                showErrorAlert("Ошибка при загрузке файла: " + e.getMessage());
                 e.printStackTrace();
             }
         }
     }
+
+
+
 
     private void showErrorAlert(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);

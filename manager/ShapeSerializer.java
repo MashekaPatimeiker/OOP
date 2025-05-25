@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 public class ShapeSerializer {
     private static final ObjectMapper objectMapper = createObjectMapper();
-    private static final Map<String, ShapePlugin> pluginShapes = new HashMap<>();
+    private static final Map<String, Class<? extends Shapes>> pluginShapes = new HashMap<>();
 
     private static ObjectMapper createObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
@@ -28,19 +28,18 @@ public class ShapeSerializer {
         return mapper;
     }
 
-    // Регистрируем плагин при его загрузке
     public static void registerPlugin(ShapePlugin plugin) {
-        pluginShapes.put(plugin.getShapeName(), plugin);
+        // Сохраняем класс фигуры вместо самого плагина
+        pluginShapes.put(plugin.getShapeName(), plugin.createShape().getClass());
     }
 
     public static void saveToFile(List<Shapes> shapes, File file) {
         try {
-            System.out.println("Saving shapes: " + shapes.size());
             List<Map<String, Object>> shapeData = shapes.stream()
                     .map(Shapes::toMap)
-                    .peek(map -> System.out.println("Shape data: " + map))
                     .collect(Collectors.toList());
             objectMapper.writeValue(file, shapeData);
+
         } catch (IOException e) {
             showErrorAlert("Error saving file: " + e.getMessage());
         }
@@ -53,18 +52,37 @@ public class ShapeSerializer {
                     new TypeReference<List<Map<String, Object>>>() {}
             );
 
-            return shapeData.stream()
-                    .map(data -> {
-                        String type = (String) data.get("type");
-                        Shapes shape = createShapeFromType(type);
-                        shape.fromMap(data);
-                        return shape;
-                    })
-                    .collect(Collectors.toList());
+            List<Shapes> result = new ArrayList<>();
+            List<String> missingPlugins = new ArrayList<>();
+
+            for (Map<String, Object> data : shapeData) {
+                String type = (String) data.get("type");
+                try {
+                    Shapes shape = createShapeFromType(type);
+                    shape.fromMap(data);
+                    result.add(shape);
+                } catch (IllegalArgumentException e) {
+                    if (isPluginShape(type)) {
+                        missingPlugins.add(type);
+                    } else {
+                        throw e;
+                    }
+                }
+            }
+
+            if (!missingPlugins.isEmpty()) {
+                throw new MissingPluginException("Missing plugins for shapes: " + String.join(", ", missingPlugins));
+            }
+
+            return result;
         } catch (IOException e) {
             showErrorAlert("Error loading file: " + e.getMessage());
             return new ArrayList<>();
         }
+    }
+
+    private static boolean isPluginShape(String type) {
+        return pluginShapes.containsKey(type);
     }
 
     private static Shapes createShapeFromType(String type) {
@@ -78,9 +96,13 @@ public class ShapeSerializer {
         }
 
         // Затем проверяем зарегистрированные плагины
-        ShapePlugin plugin = pluginShapes.get(type);
-        if (plugin != null) {
-            return plugin.createShape();
+        Class<? extends Shapes> shapeClass = pluginShapes.get(type);
+        if (shapeClass != null) {
+            try {
+                return shapeClass.getDeclaredConstructor().newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to create shape instance: " + type, e);
+            }
         }
 
         throw new IllegalArgumentException("Unknown shape type: " + type);
@@ -92,5 +114,11 @@ public class ShapeSerializer {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    public static class MissingPluginException extends RuntimeException {
+        public MissingPluginException(String message) {
+            super(message);
+        }
     }
 }

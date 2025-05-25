@@ -3,6 +3,7 @@
     import com.example.demo3.javataskclasses.*;
     import com.example.demo3.javataskclasses.myshapes.*;
     import com.example.demo3.manager.HistoryManager;
+    import com.example.demo3.manager.ShapeSerializer;
     import com.example.demo3.plugin.ShapePlugin;
     import javafx.application.Platform;
     import javafx.scene.control.Button;
@@ -28,7 +29,7 @@
         private static Shapes currentShape = null;
         private static boolean isDrawingPolyline = false;
         private static Shapes selectedShape = null;
-        private static final HistoryManager historyManager = new HistoryManager();
+        protected static final HistoryManager historyManager = new HistoryManager();
         private static ChoiceBox<String> shapeChoiceBox;
         private static ColorPicker rootColorPicker;
         private static ColorPicker fillColorPicker;
@@ -60,8 +61,10 @@
                 if (drawnShape != null) {
                     drawingPane.getChildren().add(drawnShape);
                     shapesList.add(shape);
+                    historyManager.saveState(getShapesFromPane(drawingPane));
                 }
             }
+
         }
         public static void loadPlugin(ShapePlugin plugin) {
             String shapeName = plugin.getShapeName();
@@ -73,6 +76,7 @@
 
             plugins.put(shapeName, plugin);
             shapeMap.put(shapeName, (x, y) -> plugin.createShape());
+            ShapeSerializer.registerPlugin(plugin);
 
             Platform.runLater(() -> {
                 if (!shapeChoiceBox.getItems().contains(shapeName)) {

@@ -35,7 +35,9 @@ public abstract class Shapes {
             }
         }
     }
-
+    public boolean isPluginShape() {
+        return false;
+    }
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("type", getShapeType());
@@ -46,7 +48,6 @@ public abstract class Shapes {
     }
 
     public void fromMap(Map<String, Object> map) {
-        // Используем Color.web() для преобразования строки в цвет
         this.fillColor = Color.web((String) map.get("fillColor"));
         this.strokeColor = Color.web((String) map.get("strokeColor"));
         this.strokeWidth = ((Number) map.get("strokeWidth")).doubleValue();

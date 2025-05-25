@@ -20,6 +20,13 @@ public class HistoryManager {
         currentState = new ArrayList<>(filteredState);
         redoStack.clear();
     }
+    public void loadState(List<Shapes> shapes) {
+        undoStack.push(new ArrayList<>(currentState));
+        currentState = new ArrayList<>(filterFinalizedShapes(shapes));
+        redoStack.clear();
+    }
+
+
 
     public List<Shapes> undo() {
         if (canUndo()) {
