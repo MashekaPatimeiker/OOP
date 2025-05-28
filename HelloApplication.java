@@ -82,9 +82,10 @@ public class HelloApplication extends Application {
 
         if (file != null) {
             try {
-                List<Shapes> shapes = ShapeSerializer.loadFromFile(file);
                 drawingPane.getChildren().clear();
                 shapesList.clear();
+                historyManager.clear();
+                List<Shapes> shapes = ShapeSerializer.loadFromFile(file);
                 Functions.addShapesToPane(shapes, drawingPane);
 
                 historyManager.loadState(shapes);
@@ -98,8 +99,6 @@ public class HelloApplication extends Application {
             }
         }
     }
-
-
 
 
     private void showErrorAlert(String message) {
